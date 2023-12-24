@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 from .models import TelegramUser, TelegramExpense, TelegramIncome, TelegramSupport
 
-admin.site.register(TelegramSupport)
 admin.site.register(TelegramExpense)
 admin.site.register(TelegramIncome)
+admin.site.register(TelegramSupport)
 
 @admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
@@ -46,4 +46,3 @@ class TelegramUserAdmin(admin.ModelAdmin):
         return mark_safe(info)
 
     get_formatted_info.short_description = "Информация пользователя"
-

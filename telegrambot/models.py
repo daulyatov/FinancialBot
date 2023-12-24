@@ -47,6 +47,19 @@ class TelegramUser(models.Model):
         help_text="Баланс пользователя.",
     )
     
+    chart = models.FileField(
+        upload_to="chart/",
+        blank=True,
+        null=True,
+        verbose_name="График",
+        help_text="Файл с графиком пользователя.",
+    )
+    
+    admin = models.BooleanField(
+        default=False,
+        verbose_name="Админ",
+        help_text="Указывает, является ли пользователь админом.",
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Создан",
@@ -118,7 +131,7 @@ class TelegramExpense(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Создан",
-        help_text="Временная метка, указывающая, когда был создан расход.",
+        help_text="Временная метка, указывающая, когда был создан.",
     )
 
     def __str__(self):
@@ -135,7 +148,7 @@ class TelegramSupport(models.Model):
         TelegramUser,
         on_delete=models.CASCADE,
         verbose_name="Пользователь",
-        help_text="Пользователь, которому принадлежит расход.",
+        help_text="Пользователь, которому принадлежит вопрос.",
     )
     message = models.TextField(
         verbose_name="Сообщение",
@@ -144,7 +157,7 @@ class TelegramSupport(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Создан",
-        help_text="Временная метка, указывающая, когда был создан расход.",
+        help_text="Временная метка, указывающая, когда был создан.",
     )
 
     def __str__(self):
@@ -153,4 +166,36 @@ class TelegramSupport(models.Model):
     class Meta:
         verbose_name = "Поддержка Telegram"
         verbose_name_plural = "Поддержка Telegram"
+        ordering = ["-created_at"]
+
+
+class TelegramAnswers(models.Model):
+    admin_user = models.ForeignKey(
+        TelegramUser,
+        on_delete=models.CASCADE,
+        verbose_name="Администратор",
+        help_text="Пользователь, которому выдана права администратора.",
+    )
+    questions = models.ForeignKey(
+        TelegramSupport,
+        on_delete=models.CASCADE,
+        verbose_name="Вопрос",
+        help_text="Вопрос пользователя.",
+    )
+    answer = models.TextField(
+        verbose_name="Ответ",
+        help_text="Ответ на вопрос пользователя.",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Создан",
+        help_text="Временная метка, указывающая, когда был создан.",
+    )
+    
+    def __str__(self):
+        return f"{self.admin_user.get_name()}: {self.answer}"
+    
+    class Meta:
+        verbose_name = "Ответы на вопросы Telegram"
+        verbose_name_plural = "Ответы на вопросы Telegram"
         ordering = ["-created_at"]

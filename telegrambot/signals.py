@@ -9,11 +9,4 @@ def create_data(sender, instance, created, **kwargs):
     if created:
         TelegramIncome.objects.create(user=instance)
         TelegramExpense.objects.create(user=instance)
-
-
-@receiver(post_save, sender=User)
-def save_data(sender, instance, **kwargs):
-    instance.telegramuser.save()
-    instance.telegramincome.save()
-    instance.telegramexpense.save()
-    instance.save()
+        

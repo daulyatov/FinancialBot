@@ -33,10 +33,12 @@ def get_bank_keyboard():
     btn2 = types.KeyboardButton("Перевод")
     btn3 = types.KeyboardButton("Доходы")
     btn4 = types.KeyboardButton("Расходы")
-    btn5 = types.KeyboardButton("Меню")
+    btn5 = types.KeyboardButton("График")
+    btn6 = types.KeyboardButton("Меню")
     
     keyboard.row(btn1, btn2)
     keyboard.row(btn3, btn4)
     keyboard.row(btn5)
+    keyboard.row(btn6)
     
     return keyboard

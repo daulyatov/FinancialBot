@@ -5,6 +5,7 @@ from telebot import types
 
 from django.conf import settings
 from telegrambot.models import TelegramUser, TelegramSupport, TelegramExpense, TelegramIncome
+from telegrambot.chart import userchart
 
 from telegrambot.keyboards import get_menu_keyboard, get_profile_keyboard, get_bank_keyboard
 
@@ -21,6 +22,7 @@ def start(message):
     user = message.from_user
     
     model_user, created = TelegramUser.objects.get_or_create(user_id=user.id)
+    userchart(model_user.user_id)
     
     if created:
         model_user.user_id = user.id
@@ -30,10 +32,22 @@ def start(message):
         model_user.language_code = user.language_code
         model_user.is_bot = user.is_bot
         model_user.save()
-
+ 
         logging.info(f'Был создан новый аккаунт {model_user.get_name()}')
     
     bot.send_message(message.chat.id, f"Привет, {model_user.get_name()}!", reply_markup=get_menu_keyboard())
+
+
+@bot.message_handler(func=lambda message: message.text.lower() == "график")
+def chart(message):
+    user = message.from_user
+    model_user = TelegramUser.objects.get(user_id=user.id)
+    
+    logging.info(f"Пользователь {model_user.get_name()} запросил график.") 
+    
+    contecx = userchart(model_user.user_id)
+    
+    bot.send_photo(message.chat.id, open(model_user.chart.path, "rb"), caption=contecx, reply_markup=get_bank_keyboard())
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "меню")
