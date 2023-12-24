@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 
 from django.conf import settings
-from telegrambot.models import TelegramUser, TelegramSupport, TelegramExpense, TelegramIncome
+from telegrambot.models import TelegramUser, TelegramSupport, TelegramExpense, TelegramIncome, TelegramAnswers
 from telegrambot.chart import userchart
 
 from telegrambot.keyboards import get_menu_keyboard, get_profile_keyboard, get_bank_keyboard
@@ -98,28 +98,6 @@ def profile(message):
         bot.send_message(message.chat.id, user_profile, reply_markup=get_profile_keyboard())
 
 
-def support_message(message):
-    user = message.from_user
-    model_user = TelegramUser.objects.get(user_id=user.id)
-    
-    model_support = TelegramSupport.objects.create(user=model_user, message=message.text)
-    logging.info(f"Пользователь {model_user.get_name()} отправил вопрос в поддержку.") 
-    
-    bot.send_message(message.chat.id, "Ваш вопрос отправлен в поддержку!", reply_markup=get_menu_keyboard())
-    return True
-
-
-@bot.message_handler(func=lambda message: message.text.lower() == "поддержка")
-def support(message):
-    user = message.from_user
-    model_user = TelegramUser.objects.get(user_id=user.id)
-    
-    logging.info(f"Пользователь {model_user.get_name()} в поддержке.") 
-    
-    bot.send_message(message.chat.id, "Введите ваш вопрос:", reply_markup=types.ReplyKeyboardRemove())
-    bot.register_next_step_handler(message, support_message)
-
-
 @bot.message_handler(func=lambda message: message.text.lower() == "мой банк")
 def bank(message):
     user = message.from_user
@@ -171,6 +149,37 @@ def add_balance(message):
     bot.send_message(message.chat.id, "Введите сумму:", reply_markup=types.ReplyKeyboardRemove())
     bot.register_next_step_handler(message, add_balance_message)
 
+
+def support_message(message):
+    user = message.from_user
+    model_user = TelegramUser.objects.get(user_id=user.id)
+    
+    model_support = TelegramSupport.objects.create(user=model_user, message=message.text)
+    logging.info(f"Пользователь {model_user.get_name()} отправил вопрос в поддержку.") 
+    
+    bot.send_message(message.chat.id, "Ваш вопрос отправлен в поддержку!", reply_markup=get_menu_keyboard())
+    return True
+
+
+@bot.message_handler(func=lambda message: message.text.lower() == "поддержка")
+def support(message):
+    user = message.from_user
+    model_user = TelegramUser.objects.get(user_id=user.id)
+    
+    logging.info(f"Пользователь {model_user.get_name()} в поддержке.") 
+    
+    bot.send_message(message.chat.id, "Введите ваш вопрос:", reply_markup=types.ReplyKeyboardRemove())
+    bot.register_next_step_handler(message, support_message)
+
+
+def answer_message(model_user, questions, answer):
+    text = (
+        f"Привет {model_user.get_name()}!\n"
+        f"Администраторы ответили на ваш вопрос \n'{questions}'\n\n"
+        f"Ответ: {answer}"
+    )
+    bot.send_message(model_user.user_id, text=text, reply_markup=get_menu_keyboard())
+    return
 
 
 def RunBot():
