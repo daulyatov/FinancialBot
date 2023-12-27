@@ -84,9 +84,13 @@ class TelegramUser(models.Model):
         verbose_name_plural = "Пользователи Telegram"
         ordering = ["-created_at"]
 
+class Category(models.Model):
+    name = models.CharField(max_length=50, blank=True, null=True)
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-class TelegramChat(models.Model):
-    pass
+    def __str__(self):
+        return self.name
 
 
 class TelegramIncome(models.Model):
@@ -116,6 +120,7 @@ class TelegramIncome(models.Model):
         ordering = ["-created_at"]
         
 
+
 class TelegramExpense(models.Model):
     user = models.ForeignKey(
         TelegramUser,
@@ -128,14 +133,22 @@ class TelegramExpense(models.Model):
         verbose_name="Сумма",
         help_text="Сумма расхода.",
     )
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+
+
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Создан",
         help_text="Временная метка, указывающая, когда был создан.",
     )
+    date = models.DateField(
+        auto_now_add=True,
+        verbose_name="Дата",
+        help_text="Дата совершения расхода.",
+    )
 
     def __str__(self):
-        return f"{self.user.get_name()}: {self.amount}"
+        return f"{self.user.get_name()} - {self.amount} ₸ ({self.category})"
 
     class Meta:
         verbose_name = "Расход Telegram"
@@ -199,3 +212,15 @@ class TelegramAnswers(models.Model):
         verbose_name = "Ответы на вопросы Telegram"
         verbose_name_plural = "Ответы на вопросы Telegram"
         ordering = ["-created_at"]
+
+
+class FinancialGoal(models.Model):
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+    deadline = models.DateField()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} - {self.deadline}"
+    
+
